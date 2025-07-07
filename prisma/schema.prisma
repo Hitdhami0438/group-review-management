@@ -105,6 +105,8 @@ model Message {
 // GROUP MODEL
 model Group {
   id             String        @id @default(uuid())
+  title          String        @db.VarChar(20)
+  description    String        @db.VarChar(45)
   groupLeaderId  String
   members        GroupMember[]
   todo           Todo[]

@@ -57,6 +57,8 @@ CREATE TABLE "Message" (
 -- CreateTable
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
+    "title" VARCHAR(20) NOT NULL,
+    "description" VARCHAR(45) NOT NULL,
     "groupLeaderId" TEXT NOT NULL,
     "groupDeletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

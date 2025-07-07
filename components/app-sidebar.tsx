@@ -81,12 +81,12 @@ const data = {
       icon: Users,
       items: [
         {
-          title: "Group Task",
-          url: "/group-task",
-        },
-        {
           title: "Group Member",
           url: "/group-members",
+        },
+        {
+          title: "Group Task",
+          url: "/group-task",
         },
         {
           title: "Discusion",
