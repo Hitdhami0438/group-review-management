@@ -2,9 +2,7 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { ContactRound } from "lucide-react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useMembers } from "@/hooks/dashboard/useMembers";
@@ -12,7 +10,6 @@ import { UserRole } from "@/app/generated/prisma";
 import { toast } from "sonner";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Button } from "./button";
-import { group } from "console";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -63,58 +60,6 @@ function AvatarFallback({
   );
 }
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
-  );
-}
-
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  );
-}
-
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
-}
-
-function TooltipContent({
-  className,
-  sideOffset = 8,
-  children,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
-  return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "bg-background border text-muted-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit rounded-md px-3 py-1.5 text-xs text-balance",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
-  );
-}
-
 export interface User {
   id: string;
   username: string;
@@ -131,16 +76,16 @@ interface MemberLineProps {
 
 interface GroupType {
   id: string;
-  title?: string;
-  description?: string;
+  projectName?: string;
+  projectDescription?: string;
   createdAt?: Date;
 }
 
-export function HoverGroup({ group }: { group: GroupType }) {
+function HoverGroup({ group }: { group: GroupType }) {
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <Button variant="link">{group.id ? "@Group Member" : ""}</Button>
+        <Button variant="link">@Group Member</Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
         <div className="flex justify-between gap-4">
@@ -149,10 +94,8 @@ export function HoverGroup({ group }: { group: GroupType }) {
             <AvatarFallback>VC</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <h4 className="text-sm font-semibold">@{group.title}</h4>
-            <p className="text-sm">
-              {group.description}
-            </p>
+            <h4 className="text-sm font-semibold">@{group.projectName}</h4>
+            <p className="text-sm">{group.projectDescription}</p>
             <div className="text-muted-foreground text-xs">
               Joined {format(new Date(group.createdAt!), "MMM yyyy")}
             </div>
@@ -161,6 +104,10 @@ export function HoverGroup({ group }: { group: GroupType }) {
       </HoverCardContent>
     </HoverCard>
   );
+}
+
+function UserRequestButton({ user }: { user: User }) {
+  return <Button variant="default">Request</Button>;
 }
 
 const avatarUrl = (seed: string) =>
@@ -193,9 +140,11 @@ function MemberLine({ user }: MemberLineProps) {
         {format(new Date(user.createdAt), "MMM yyyy")}
       </div>
       <div className="w-40 shrink-0 flex text-xs text-muted-foreground">
-        {user.group.map((group) => (
-          <HoverGroup key={group.id} group={group} />
-        ))}
+        {user.group.length > 0 ? (
+          user.group.map((group) => <HoverGroup key={group.id} group={group} />)
+        ) : (
+          <UserRequestButton user={user} />
+        )}
       </div>
     </div>
   );
@@ -207,7 +156,7 @@ const MemberList = React.forwardRef<
 >(({ className, ...props }, ref) => {
   const { data: users, isFetched, isError, error } = useMembers();
 
-  if (isFetched) toast.success("Data fetch successfuly");
+  // if (isFetched) toast.success("Data fetch successfuly");
   if (isError) toast.error(error.message);
 
   return (

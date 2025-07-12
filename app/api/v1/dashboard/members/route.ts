@@ -13,8 +13,8 @@ export async function GET() {
       group: {
         select: {
           id: true,
-          title: true,
-          description: true,
+          projectName: true,
+          projectDescription: true,
           createdAt: true,
         },
       },

@@ -16,10 +16,10 @@ datasource db {
 
 // USER LOGS MODEL
 model Log {
-  id      String   @id @default(uuid())
-  userId  String?
-  action  String
-  logType LogType?
+  id        String   @id @default(uuid())
+  userId    String?
+  logAction String
+  logType   LogType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,15 +102,27 @@ model Message {
   @@index([senderId])
 }
 
+// GROUP STATUS ENUM
+enum GroupStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
 // GROUP MODEL
 model Group {
-  id             String        @id @default(uuid())
-  title          String        @db.VarChar(20)
-  description    String        @db.VarChar(45)
-  groupLeaderId  String
-  members        GroupMember[]
-  todo           Todo[]
-  groupDeletedAt DateTime?
+  id                 String        @id @default(uuid())
+  projectName        String        @db.VarChar(45)
+  projectDescription String?       @db.VarChar(100)
+  codeRepositoryUri  String?
+  teamName           String?
+  projectTech        String?
+  groupProjectStatus GroupStatus   @default(PENDING)
+  groupLeaderId      String
+  groupMembers       GroupMember[]
+  projectTodo        Todo[]
+  groupDeletedAt     DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,7 +174,8 @@ enum TodoPriority {
 model Todo {
   id          String       @id @default(uuid())
   groupId     String
-  content     String       @db.VarChar(300)
+  todoTitle   String       @db.VarChar(50)
+  todoContent String       @db.VarChar(300)
   priority    TodoPriority @default(PENDING)
   isCompleted Boolean      @default(false)
 

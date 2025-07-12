@@ -5,13 +5,16 @@ CREATE TYPE "LogType" AS ENUM ('SECURITY', 'PROFILE', 'GROUP', 'ASIGNTOGROUPLEAD
 CREATE TYPE "UserRole" AS ENUM ('USER', 'GROUPLEADER', 'ADMIN', 'ADMINISTRATOR', 'STANDARDUSER', 'PREMIUMUSER', 'ENTERPRISE');
 
 -- CreateEnum
+CREATE TYPE "GroupStatus" AS ENUM ('PENDING', 'ACTIVE', 'INACTIVE', 'BLOCKED');
+
+-- CreateEnum
 CREATE TYPE "TodoPriority" AS ENUM ('PROCESS', 'PENDING', 'COMPLETED', 'CANCELED');
 
 -- CreateTable
 CREATE TABLE "Log" (
     "id" TEXT NOT NULL,
     "userId" TEXT,
-    "action" TEXT NOT NULL,
+    "logAction" TEXT NOT NULL,
     "logType" "LogType",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -57,8 +60,12 @@ CREATE TABLE "Message" (
 -- CreateTable
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
-    "title" VARCHAR(20) NOT NULL,
-    "description" VARCHAR(45) NOT NULL,
+    "projectName" VARCHAR(45) NOT NULL,
+    "projectDescription" VARCHAR(100),
+    "codeRepositoryUri" TEXT,
+    "teamName" TEXT,
+    "projectTech" TEXT,
+    "groupProjectStatus" "GroupStatus" NOT NULL DEFAULT 'PENDING',
     "groupLeaderId" TEXT NOT NULL,
     "groupDeletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -92,7 +99,8 @@ CREATE TABLE "GroupMember" (
 CREATE TABLE "Todo" (
     "id" TEXT NOT NULL,
     "groupId" TEXT NOT NULL,
-    "content" VARCHAR(300) NOT NULL,
+    "todoTitle" VARCHAR(50) NOT NULL,
+    "todoContent" VARCHAR(300) NOT NULL,
     "priority" "TodoPriority" NOT NULL DEFAULT 'PENDING',
     "isCompleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
