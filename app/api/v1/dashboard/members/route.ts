@@ -10,12 +10,16 @@ export async function GET() {
       image: true,
       role: true,
       createdAt: true,
-      group: {
+      groupMember: {
         select: {
-          id: true,
-          projectName: true,
-          projectDescription: true,
-          createdAt: true,
+          group: {
+            select: {
+              id: true,
+              projectName: true,
+              projectDescription: true,
+              createdAt: true,
+            },
+          },
         },
       },
     },

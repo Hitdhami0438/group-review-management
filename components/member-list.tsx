@@ -60,6 +60,13 @@ function AvatarFallback({
   );
 }
 
+export interface Group {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: Date;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -67,7 +74,9 @@ export interface User {
   image: string;
   role: UserRole;
   createdAt: Date;
-  group: { id: string; title: string; description: string }[];
+  groupMember: {
+    group: Group;
+  }[];
 }
 
 interface MemberLineProps {
@@ -140,8 +149,10 @@ function MemberLine({ user }: MemberLineProps) {
         {format(new Date(user.createdAt), "MMM yyyy")}
       </div>
       <div className="w-40 shrink-0 flex text-xs text-muted-foreground">
-        {user.group.length > 0 ? (
-          user.group.map((group) => <HoverGroup key={group.id} group={group} />)
+        {user.groupMember.length > 0 ? (
+          user.groupMember.map((member) => (
+            <HoverGroup key={member.group.id} group={member.group} />
+          ))
         ) : (
           <UserRequestButton user={user} />
         )}

@@ -26,7 +26,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { ExternalLink, Eye } from "lucide-react";
+import { useGroups } from "@/hooks/dashboard/useGroups";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 type Contributor = {
   name: string;
@@ -39,38 +42,12 @@ type Project = {
   id: string;
   title: string;
   repo: string;
-  status: "Active" | "Inactive" | "In Progress";
+  status: "ACTIVE" | "INACTIVE" | "PENDING" | "BLOCKED";
   team: string;
   tech: string;
   createdAt: string;
   contributors: Contributor[];
 };
-
-const data: Project[] = [
-  {
-    id: "1",
-    title: "ShadCN Clone",
-    repo: "https://github.com/ruixenui/ruixen-buttons",
-    status: "Active",
-    team: "UI Guild",
-    tech: "Next.js",
-    createdAt: "2024-06-01",
-    contributors: [
-      {
-        name: "Srinath G",
-        email: "srinath@example.com",
-        avatar: "https://github.com/srinath.png",
-        role: "UI Lead",
-      },
-      {
-        name: "Kavya M",
-        email: "kavya@example.com",
-        avatar: "https://github.com/kavya.png",
-        role: "Designer",
-      },
-    ],
-  },
-];
 
 const allColumns = [
   "Project",
@@ -83,6 +60,41 @@ const allColumns = [
 ] as const;
 
 function ContributorsTable() {
+  const { data: groups, isFetched, isError, error } = useGroups();
+
+  // if (isFetched) toast.success("Grops fatch successfully");
+  if (isError) toast.error(error.message ?? "Faield to fetch groups");
+
+  const avatarUrl = (seed: string) =>
+    `https://api.dicebear.com/9.x/glass/svg?seed=${seed}`;
+
+  const data: Project[] = (groups ?? []).map((group: any) => ({
+    id: group.id,
+    title: group?.projectName,
+    repo: group?.codeRepositoryUri,
+    status: group?.groupProjectStatus,
+    team: group?.teamName,
+    tech: group?.projectTech,
+    createdAt: group?.createdAt,
+    contributors: group.groupMembers.map((member: any) => ({
+      name: member.user?.username,
+      email: member.user?.email,
+      avatar: member.user?.image ?? avatarUrl(member.user.email),
+      role: member.user.role,
+    })),
+
+    // contributors: [
+    //   {
+    //     name: group.groupMembers.map((member: any) => member.user.username),
+    //     email: group.groupMembers.map((member: any) => member.user.email),
+    //     avatar: group.groupMembers.map(
+    //       (member: any) => member.user.image ?? avatarUrl(group.id)
+    //     ),
+    //     role: group.groupMembers.map((member: any) => member.user.role),
+    //   },
+    // ],
+  }));
+
   const [visibleColumns, setVisibleColumns] = useState<string[]>([
     ...allColumns,
   ]);
@@ -184,7 +196,16 @@ function ContributorsTable() {
                       rel="noopener noreferrer"
                       className="text-blue-500 underline"
                     >
-                      {project.repo.replace("https://", "")}
+                      {/* {project.repo.replace("https://", "")} */}
+                      <div className="whitespace-nowrap flex gap-0.5">
+                        {project.repo ? (
+                          <>
+                            Code Repo <ExternalLink size="20px" />
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </div>
                     </a>
                   </TableCell>
                 )}
@@ -200,7 +221,7 @@ function ContributorsTable() {
                 )}
                 {visibleColumns.includes("Created At") && (
                   <TableCell className="whitespace-nowrap">
-                    {project.createdAt}
+                    {format(new Date(project.createdAt), "MMM yyyy")}
                   </TableCell>
                 )}
                 {visibleColumns.includes("Contributors") && (
@@ -242,12 +263,13 @@ function ContributorsTable() {
                     <Badge
                       className={cn(
                         "whitespace-nowrap",
-                        project.status === "Active" &&
+                        project.status === "ACTIVE" &&
                           "bg-green-500 text-white",
-                        project.status === "Inactive" &&
+                        project.status === "INACTIVE" &&
                           "bg-gray-400 text-white",
-                        project.status === "In Progress" &&
-                          "bg-yellow-500 text-white"
+                        project.status === "PENDING" &&
+                          "bg-yellow-500 text-white",
+                        project.status === "BLOCKED" && "bg-red-500 text-white"
                       )}
                     >
                       {project.status}
